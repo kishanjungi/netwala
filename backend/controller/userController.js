@@ -3,6 +3,11 @@ import userModel from '../models/userModel.js';
 import bycrpt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import { OAuth2Client } from "google-auth-library";
+
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 
 
@@ -19,8 +24,9 @@ const loginUser = async (req, res) => {
         const user = await userModel.findOne({ email });
 
         if (!user) {
-            res.json({ success: false, message: "user does't exists" })
+            return res.json({ success: false, message: "user doesn't exist" });
         }
+
 
         const isMatch = await bycrpt.compare(password, user.password);
 
@@ -101,4 +107,42 @@ const adminLogin = async (req, res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin };
+
+const googleLogin = async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const { name, email } = ticket.getPayload();
+
+        let user = await userModel.findOne({ email });
+
+        if (!user) {
+            user = await userModel.create({
+                name,
+                email,
+                isGoogleUser: true
+            });
+        }
+
+        const jwtToken = createtoken(user._id);
+
+        res.json({
+            success: true,
+            token: jwtToken
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(401).json({
+            success: false,
+            message: "Google authentication failed"
+        });
+    }
+};
+
+export { loginUser, registerUser, adminLogin ,googleLogin};
