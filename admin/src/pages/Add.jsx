@@ -14,11 +14,16 @@ const Add = ({token}) => {
 
   const [name, setName] = useState('');
   const [description, setDescrption] = useState('');
+  const [description1, setDescrption1] = useState('');
+  const [description2, setDescrption2] = useState('');
+  const [description3, setDescrption3] = useState('');
+  const [description4, setDescrption4] = useState('');
+
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Men');
-  const [subCategory, setSubCategory] = useState('Topwear');
+  // const [category, setCategory] = useState('Men');
+  // const [subCategory, setSubCategory] = useState('Topwear');
   const [bestseller, setBestseller] = useState(false);
-  const [sizes, setSizes] = useState([]);
+  // const [sizes, setSizes] = useState([]);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -28,11 +33,15 @@ const Add = ({token}) => {
 
       formData.append("name", name);
       formData.append("description", description);
-      formData.append("category", category);
-      formData.append("subCategory", subCategory);
+      formData.append("description1", description1);
+      formData.append("description2", description2);
+      formData.append("description3", description3);
+      formData.append("description4", description4);
+      // formData.append("category", category);
+      // formData.append("subCategory", subCategory);
       formData.append("price", price);
       formData.append("bestseller", bestseller);
-      formData.append("sizes", JSON.stringify(sizes));
+      // formData.append("sizes", JSON.stringify(sizes));
 
       image1 && formData.append("image1", image1);
       image2 && formData.append("image2", image2);
@@ -45,6 +54,10 @@ const Add = ({token}) => {
           toast.success(response.data.message);
           setName("");
           setDescrption("");
+          setDescrption1("");
+          setDescrption2("");
+          setDescrption3("");
+          setDescrption4("");
           setImage1(false);
           setImage2(false);
           setImage3(false);
@@ -98,18 +111,34 @@ const Add = ({token}) => {
         <p className='mb-2'>Product Description</p>
         <textarea onChange={(e) => setDescrption(e.target.value)} value={description} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' required />
       </div>
+      <div className='w-full'>
+        <p className='mb-2'>Product Description1</p>
+        <textarea onChange={(e) => setDescrption1(e.target.value)} value={description1} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+      </div>
+      <div className='w-full'>
+        <p className='mb-2'>Product Description2</p>
+        <textarea onChange={(e) => setDescrption2(e.target.value)} value={description2} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+      </div>
+      <div className='w-full'>
+        <p className='mb-2'>Product Description3</p>
+        <textarea onChange={(e) => setDescrption3(e.target.value)} value={description3} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+      </div>
+      <div className='w-full'>
+        <p className='mb-2'>Product Description4</p>
+        <textarea onChange={(e) => setDescrption4(e.target.value)} value={description4} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' />
+      </div>
 
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
-        <div>
+        {/* <div>
           <p className='mb-2'>Product Category</p>
           <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2'>
             <option value="Men">Men</option>
             <option value="Women">Women</option>
             <option value="Kids">Kids</option>
           </select>
-        </div>
+        </div> */}
 
-        <div>
+        {/* <div>
           <p className='mb-2'>Sub Category</p>
           <select onChange={(e) => setSubCategory(e.target.value)} className='w-full px-3 py-2'>
             <option value="Topwear">Topwear</option>
@@ -117,7 +146,7 @@ const Add = ({token}) => {
             <option value="Winterwear">Winterwear</option>
 
           </select>
-        </div>
+        </div> */}
 
         <div>
           <p className='mb-2' >Product Price</p>
@@ -125,7 +154,7 @@ const Add = ({token}) => {
         </div>
       </div>
 
-      <div className='w-full'>
+      {/* <div className='w-full'>
         <p className='mb-2'>Product Sizes</p>
         <div className='flex gap-3'>
           <div onClick={() => setSizes(prev => prev.includes("S") ? prev.filter(item => item !== "S") : [...prev, "S"])}>
@@ -145,7 +174,7 @@ const Add = ({token}) => {
           </div>
 
         </div>
-      </div>
+      </div> */}
 
       <div className='flex gap-2 mt-2 w-full'>
         <input onChange={() => setBestseller(prev => !prev)} checked={bestseller} type="checkbox" id='bestseller' />

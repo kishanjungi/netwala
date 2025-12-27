@@ -7,6 +7,7 @@ import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import authRoutes from "./routes/authRoute.js"; 
+import alluserRoute from "./routes/alluserRoute.js";
 
 import "./config/googleAuth.js";
 
@@ -38,6 +39,7 @@ app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/order',orderRouter)
 app.use("/auth", authRoutes); 
+app.use("/api/alluser",alluserRoute);
 // routes and other middleware...
 
 

@@ -81,12 +81,12 @@ const collection = () => {
    <div className='flex flex-col sm:flex-row gap-1 sm:gap-19 pt-10 border-t'>
 
     {/* Filter options */}
-    <div className='min-w-60'>
+    {/* <div className='min-w-60'>
       <p onClick={()=>{setshowFilter(!showFilter)}} className='my-2 text-2xl flex items-center cursor-pointer gap-2'>Filter
         <img src={assets.dropdown_icon} className={`h-3 sm:hidden ${showFilter ?'rotate-90  ':''}`} alt="" />
-      </p>
+      </p> */}
       {/* Category filter */}
-      <div className={`border border-grey-300 pl-5 py-3 mt-6 ${showFilter?'':"hidden"} sm:block`}>
+      {/* <div className={`border border-grey-300 pl-5 py-3 mt-6 ${showFilter?'':"hidden"} sm:block`}>
         <p className='mb-3 text-xm font-medium'>CATEGORIES</p>
         <div className='flex flex-col gap-2 text-sm font-light text-grey-700'>
           <p className='flex gap-2'>
@@ -99,9 +99,9 @@ const collection = () => {
             <input type="checkbox" className='w-3' value={'Kids'} onChange={toggelCategory}/>Kids
           </p>
         </div>
-      </div>
+      </div> */}
       {/* subCategory filter */}
-      <div className={`border border-grey-300 pl-5 py-3 my-5 ${showFilter?'':"hidden"} sm:block`}>
+      {/* <div className={`border border-grey-300 pl-5 py-3 my-5 ${showFilter?'':"hidden"} sm:block`}>
         <p className='mb-3 text-xm font-medium'>TYPE</p>
         <div className='flex flex-col gap-2 text-sm font-light text-grey-700'>
           <p className='flex gap-2'>
@@ -115,7 +115,7 @@ const collection = () => {
           </p>
         </div>
       </div>
-    </div>
+    </div> */}
 
     {/* Right side  */}
 

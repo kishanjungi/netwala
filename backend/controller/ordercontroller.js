@@ -12,31 +12,91 @@ const stripe=new Stripe(process.env.STRIPE_SECRET_KEY)
 //     key_secret:process.env.RAZORPAY_KEY_SECRET,
 // })
 
-const placeOrder=async (req,res)=>{
- try{
-        const {userId,items,amount,address}=req.body;
+// const placeOrder=async (req,res)=>{
+//  try{
+//         const {userId,items,amount,address}=req.body;
 
-        const orderData={
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod:"COD",
-            payment:false,
-            date:Date.now()
-        }
+//         const orderData={
+//             userId,
+//             items,
+//             address,
+//             amount,
+//             paymentMethod:"COD",
+//             payment:false,
+//             date:Date.now()
+//         }
 
-        const newOrder= new orderModel(orderData);
-        await newOrder.save()
+//         const newOrder= new orderModel(orderData);
+//         await newOrder.save()
 
-        await userModel.findByIdAndUpdate(userId,{cartData:{}})
+//         await userModel.findByIdAndUpdate(userId,{cartData:{}})
 
-        res.json({success:true,message:"Order Placed"})
-    }catch(error){
-        console.log(error);
-        res.json({success:false,message:error.message})
+//         res.json({success:true,message:"Order Placed"})
+//     }catch(error){
+//         console.log(error);
+//         res.json({success:false,message:error.message})
+//     }
+// }
+
+const placeOrder = async (req, res) => {
+  try {
+    const { userId, items, amount, address } = req.body;
+
+    // 1️⃣ Quantity limit per order
+    const orderQty = items.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    if (orderQty > 2) {
+      return res.json({
+        success: false,
+        message: "You can order only 2 items at a time"
+      });
     }
-}
+
+    // 2️⃣ Check existing active order
+    const activeOrder = await orderModel.findOne({
+      userId,
+      status: ["Order Placed","Packing","Shipped","Out for Delivary"]
+    });
+
+    if (activeOrder) {
+      return res.json({
+        success: false,
+        message: "You already have an active order. Please wait for delivery."
+      });
+    }
+
+    // 3️⃣ Place new order
+    const orderData = {
+      userId,
+      items,
+      address,
+      amount,
+      paymentMethod: "COD",
+      payment: false,
+      status: "Order Placed",
+      date: Date.now()
+    };
+
+    const newOrder = new orderModel(orderData);
+    await newOrder.save();
+
+    // 4️⃣ Clear cart
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    res.json({
+      success: true,
+      message: "Order Placed Successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 
 
 const placeOrderStripe=async (req,res)=>{
