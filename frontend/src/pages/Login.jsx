@@ -16,16 +16,21 @@ const Login = () => {
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     try {
-      if (currentState === 'Sign up') {
-        const response = await axios.post(backendUrl + '/api/users/register', { name, email, password })
-        if (response.data.success) {
-          setToken(response.data.token);
-          localStorage.setItem('token', response.data.token)
-          toast.success(response.data.message)
-        } else {
-          toast.error(response.data.message)
-        }
-      } else {
+        if (currentState === 'Sign up') {
+            const response = await axios.post(
+              backendUrl + '/api/users/register',
+              { name, email, password }
+            );
+
+            if (response.data.success) {
+              toast.success("Registration successful. Please verify your email.");
+              setCurrentState('Login'); // move user to login page
+            } else {
+              toast.error(response.data.message);
+            }
+          }
+
+      else {
         const response = await axios.post(backendUrl + '/api/users/login', { email, password })
         if (response.data.success) {
           setToken(response.data.token);

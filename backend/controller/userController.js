@@ -4,6 +4,8 @@ import bycrpt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import { OAuth2Client } from "google-auth-library";
+import crypto from "crypto";
+import { sendVerificationEmail } from "../utils/sendEmail.js";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -27,6 +29,12 @@ const loginUser = async (req, res) => {
             return res.json({ success: false, message: "user doesn't exist" });
         }
 
+        if (!user.isEmailVerified) {
+            return res.json({
+              success: false,
+              message: "Please verify your email first"
+            });
+          }
 
         const isMatch = await bycrpt.compare(password, user.password);
 
@@ -68,17 +76,30 @@ const registerUser = async (req, res) => {
         const salt = await bycrpt.genSalt(10);
         const hasedPassword = await bycrpt.hash(password, salt)
 
-        const newUser = new userModel({
-            name,
-            email,
-            password: hasedPassword
-        })
+       // generate email verification token
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+
+     const newUser = new userModel({
+        name,
+        email,
+        password: hasedPassword,
+        verificationToken,
+        verificationTokenExpiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+    });
+
 
         const user = await newUser.save();
 
         const token = createtoken(user._id);
 
-        res.json({ success: true, token ,message:"user registerd"})
+// send verification email (non-blocking)
+        sendVerificationEmail(user.email, verificationToken);
+
+        res.json({
+        success: true,
+        token,
+        message: "User registered. Please verify your email."
+        });
 
 
     } catch (error) {
@@ -89,6 +110,78 @@ const registerUser = async (req, res) => {
 
 
 }
+
+
+
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await userModel.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification link"
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpiry = undefined;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Email verified successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+const resendVerificationEmail = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.json({ success: true, message: "Email already verified" });
+    }
+
+    const newToken = crypto.randomBytes(32).toString("hex");
+
+    user.verificationToken = newToken;
+    user.verificationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+
+    await user.save();
+
+    sendVerificationEmail(user.email, newToken);
+
+    res.json({
+      success: true,
+      message: "Verification email resent"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 
 //  user admin login
@@ -145,4 +238,11 @@ const googleLogin = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser, adminLogin ,googleLogin};
+export {
+  loginUser,
+  registerUser,
+  adminLogin,
+  googleLogin,
+  verifyEmail,
+  resendVerificationEmail
+};
