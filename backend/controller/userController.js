@@ -95,16 +95,16 @@ const registerUser = async (req, res) => {
 // send verification email (non-blocking)
         const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
-        sendEmail(
-          user.email,
-          "Verify your email",
-          `
+        sendEmail({
+          to:user.email,
+          subject:"Verify your email",
+         html: `
             <h2>Email Verification</h2>
             <p>Click the link below to verify your email:</p>
             <a href="${verificationLink}">${verificationLink}</a>
             <p>This link will expire in 24 hours.</p>
           `
-        );
+    });
 
 
         res.json({
@@ -183,16 +183,16 @@ const resendVerificationEmail = async (req, res) => {
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    sendEmail(
-      user.email,
-      "Reset your password",
-      `
+    sendEmail({
+      to:user.email,
+      subject:"Reset your password",
+      html:`
         <h2>Password Reset</h2>
         <p>Click the link below to reset your password:</p>
         <a href="${resetLink}">${resetLink}</a>
         <p>This link will expire in 15 minutes.</p>
       `
-    );
+  });
 
 
     res.json({
@@ -236,16 +236,16 @@ const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    await sendEmail(
-      user.email,
-      "Reset your password",
-      `
+    await sendEmail({
+      to:user.email,
+      subject:"Reset your password",
+      html:`
         <h2>Password Reset</h2>
         <p>Click the link below to reset your password:</p>
         <a href="${resetLink}">${resetLink}</a>
         <p>This link will expire in 15 minutes.</p>
       `
-    );
+  });
 
 
     res.json({
