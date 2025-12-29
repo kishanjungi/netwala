@@ -5,7 +5,9 @@ import {
   registerUser,
   googleLogin,
   verifyEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword
 } from '../controller/userController.js';
 
 import auth from '../middleware/auth.js';
@@ -21,5 +23,11 @@ userRouter.post('/google-login', googleLogin);
 // Email verification routes
 userRouter.get('/verify-email/:token', verifyEmail);
 userRouter.post('/resend-verification', auth, resendVerificationEmail);
+
+
+// Forgot password routes
+userRouter.post('/forgot-password', forgotPassword);
+userRouter.post('/reset-password/:token', resetPassword);
+
 
 export default userRouter;

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
-import { sendVerificationEmail } from "../utils/sendEmail.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -93,7 +93,19 @@ const registerUser = async (req, res) => {
         const token = createtoken(user._id);
 
 // send verification email (non-blocking)
-        sendVerificationEmail(user.email, verificationToken);
+        const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+
+        sendEmail(
+          user.email,
+          "Verify your email",
+          `
+            <h2>Email Verification</h2>
+            <p>Click the link below to verify your email:</p>
+            <a href="${verificationLink}">${verificationLink}</a>
+            <p>This link will expire in 24 hours.</p>
+          `
+        );
+
 
         res.json({
         success: true,
@@ -169,7 +181,19 @@ const resendVerificationEmail = async (req, res) => {
 
     await user.save();
 
-    sendVerificationEmail(user.email, newToken);
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    sendEmail(
+      user.email,
+      "Reset your password",
+      `
+        <h2>Password Reset</h2>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link will expire in 15 minutes.</p>
+      `
+    );
+
 
     res.json({
       success: true,
@@ -179,6 +203,109 @@ const resendVerificationEmail = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// forgot password function
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User with this email does not exist"
+      });
+    }
+
+    if (user.isGoogleUser) {
+      return res.json({
+        success: false,
+        message: "Please login using Google"
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    await user.save();
+
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    await sendEmail(
+      user.email,
+      "Reset your password",
+      `
+        <h2>Password Reset</h2>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link will expire in 15 minutes.</p>
+      `
+    );
+
+
+    res.json({
+      success: true,
+      message: "Password reset link sent to your email"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// reset password function 
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password must be at least 8 characters"
+      });
+    }
+
+    const user = await userModel.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset link"
+      });
+    }
+
+    const salt = await bycrpt.genSalt(10);
+    user.password = await bycrpt.hash(password, salt);
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiry = undefined;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successful"
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
@@ -244,5 +371,7 @@ export {
   adminLogin,
   googleLogin,
   verifyEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword
 };

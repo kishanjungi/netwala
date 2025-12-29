@@ -19,7 +19,7 @@ const userSchema = mongoose.Schema({
     default: false
   },
 
-  // ✅ EMAIL VERIFICATION FIELDS (NEW)
+  // EMAIL VERIFICATION FIELDS
   isEmailVerified: {
     type: Boolean,
     default: function () {
@@ -33,7 +33,17 @@ const userSchema = mongoose.Schema({
 
   verificationTokenExpiry: {
     type: Date
+  },
+
+  // 🔐 FORGOT PASSWORD FIELDS
+  resetPasswordToken: {
+    type: String
+  },
+
+  resetPasswordExpiry: {
+    type: Date
   }
+
 
 }, { minimize: false });
 

@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import "dotenv/config";
 
-export const sendVerificationEmail = async (email, token) => {
+export const sendEmail = async (to, subject, html) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -11,23 +11,12 @@ export const sendVerificationEmail = async (email, token) => {
       }
     });
 
-    const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
-
-
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"Netwala" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Verify your email",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Thank you for registering.</p>
-        <p>Click the link below to verify your email:</p>
-        <a href="${verificationLink}">${verificationLink}</a>
-        <p>This link will expire in 24 hours.</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
+      to,
+      subject,
+      html
+    });
 
   } catch (error) {
     console.log("Email send error:", error);
