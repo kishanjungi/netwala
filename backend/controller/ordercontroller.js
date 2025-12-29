@@ -2,6 +2,8 @@ import orderModel from '../models/orderModel.js';
 import userModel from '../models/userModel.js';
 import Stripe from 'stripe';
     import razorpay from 'razorpay';
+import { sendEmail } from '../utils/sendEmail.js';
+import { generateInvoice } from '../utils/generateInvoice.js';
 
 const currency="inr"
 const deliverycharges=10
@@ -83,7 +85,29 @@ const placeOrder = async (req, res) => {
     const newOrder = new orderModel(orderData);
     await newOrder.save();
 
-    // 4️⃣ Clear cart
+
+    const user = await userModel.findById(userId);
+
+    const invoicePDF = await generateInvoice(newOrder, user);
+
+    await sendEmail({
+      to: user.email,
+      subject: "Order Confirmation & Invoice",
+      html: `
+        <h2>Thank you for your order!</h2>
+        <p>Your order has been placed successfully.</p>
+        <p><b>Order ID:</b> ${newOrder._id}</p>
+      `,
+      attachments: [
+        {
+          filename: `invoice-${newOrder._id}.pdf`,
+          content: invoicePDF
+        }
+      ]
+    });
+
+
+    // Clear cart
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
     res.json({

@@ -27,10 +27,11 @@ const ForgotPassword = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Forgot Password</h2>
+    <div className=" flex items-center justify-center mt-10 mb-50">
+    <form  className="w-[300px]  flex flex-col gap-3"onSubmit={handleSubmit}>
+      <h2 className="text-center" >Forgot Password</h2>
 
-      <input
+      <input className="border"
         type="email"
         placeholder="Enter your email"
         value={email}
@@ -38,8 +39,9 @@ const ForgotPassword = () => {
         required
       />
 
-      <button type="submit">Send Reset Link</button>
+      <button  className="bg-gray-200 hover:bg-gray-500"type="submit">Send Reset Link</button>
     </form>
+    </div>
   );
 };
 
