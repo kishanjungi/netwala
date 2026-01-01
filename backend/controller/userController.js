@@ -227,7 +227,7 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = crypto.randomBytes(10).toString("hex");
 
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
