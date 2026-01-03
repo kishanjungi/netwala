@@ -3,6 +3,7 @@ import { Routes,Route } from 'react-router-dom';
 import Navbar from './components/navbar.jsx';
 import Home from './pages/Home.jsx';
 import Collection from './pages/Collection.jsx';
+import BulkOrder from './pages/BulkOrder.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
 import Prouduct from './pages/Product.jsx';
@@ -32,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home/>}></Route>
         <Route path="/collection" element={<Collection/>}></Route>
+        <Route path='/bulkorders' element={<BulkOrder/>}></Route>
         <Route path="/about" element={<About/>}></Route>
         <Route path="contact" element={<Contact/>}></Route>
         <Route path="/product/:productId" element={<Prouduct/>}></Route>

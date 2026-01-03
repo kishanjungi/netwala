@@ -6,6 +6,8 @@ import 'dotenv/config';
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
+import redis from "../config/redis.js";
+
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -15,7 +17,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // token creation
 
-const createtoken = (id) => {
+  const createtoken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET);
 }
 //  user login  
@@ -207,57 +209,89 @@ const resendVerificationEmail = async (req, res) => {
 };
 
 // forgot password function
+
+const MAX_ATTEMPTS=3;
+const WINDOW_TIME=15*60;
+
+
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await userModel.findOne({ email });
+    const redisKey = `forgot:${email}`;
+    const attempts = await redis.incr(redisKey);
 
-    if (!user) {
-      return res.json({
+    if (attempts === 1) {
+      await redis.expire(redisKey, WINDOW_TIME);
+    }
+
+    if (attempts > MAX_ATTEMPTS) {
+      return res.status(429).json({
         success: false,
-        message: "User with this email does not exist"
+        message: "Too many requests. Try again after 15 minutes"
       });
     }
 
-    if (user.isGoogleUser) {
+     //  DB LOOKUP
+    const user = await userModel
+      .findOne({ email })
+      .select("_id email isGoogleUser");
+
+    //  Prevent email enumeration
+    if (!user || user.isGoogleUser) {
       return res.json({
-        success: false,
-        message: "Please login using Google"
+        success: true,
+        message: "If this email exists, a reset link has been sent"
       });
     }
 
-    const resetToken = crypto.randomBytes(10).toString("hex");
+    //  GENERATE TOKEN (RAW + HASHED)
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
-
-    await user.save();
+    // save hashed token
+     await userModel.updateOne(
+      { _id: user._id },
+      {
+        resetPasswordToken: hashedToken,
+        resetPasswordExpiry: new Date(Date.now() + 15 * 60 * 1000)
+      }
+    );
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    await sendEmail({
-      to:user.email,
-      subject:"Reset your password",
-      html:`
-        <h2>Password Reset</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link will expire in 15 minutes.</p>
-      `
-  });
-
-
+    // immediate response
     res.json({
       success: true,
-      message: "Password reset link sent to your email"
+      message: "If this email exists, a reset link has been sent"
     });
 
+
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Reset your password",
+          html: `
+            <h2>Password Reset</h2>
+            <p>Click the link below to reset your password:</p>
+            <a href="${resetLink}">${resetLink}</a>
+            <p>This link will expire in 15 minutes.</p>
+          `
+        });
+      } catch (err) {
+        console.error("Email error:", err.message);
+      }
+    });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: "Server Error"
     });
   }
 };
@@ -275,9 +309,14 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
     const user = await userModel.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpiry: { $gt: Date.now() }
+      resetPasswordToken: hashedToken,
+      resetPasswordExpiry: { $gt: Date.now()}
     });
 
     if (!user) {

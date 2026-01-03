@@ -28,11 +28,15 @@ const navbar = () => {
             <hr className='w-2/4 border h-[1.5px] bg-grey-700 hidden' />
           </NavLink>
           <NavLink to='/collection' className="flex flex-col items-center gap-1 ">
-            <p>COLLECTION</p>
+            <p>PRODUCTS</p>
+            <hr className='w-2/4 border h-[1.5px] bg-grey-700 hidden' />
+          </NavLink>
+          <NavLink to='/bulkorders' className="flex flex-col items-center gap-1 ">
+            <p>BULK-ORDERS</p>
             <hr className='w-2/4 border h-[1.5px] bg-grey-700 hidden' />
           </NavLink>
           <NavLink to='/about' className="flex flex-col items-center gap-1 ">
-            <p>ABOUT</p>
+            <p>ABOUT-US</p>
             <hr className='w-2/4 border h-[1.5px] bg-grey-700 hidden' />
           </NavLink>
           <NavLink to='/contact' className="flex flex-col items-center gap-1 ">
@@ -78,6 +82,7 @@ const navbar = () => {
           </div>
           <NavLink onClick={()=>setVisible(false)} className="py-2 pl-6 border" to='/'>HOME</NavLink>
           <NavLink onClick={()=>setVisible(false)} className="py-2 pl-6 border" to='/collection'>COLLECTION</NavLink>
+          <NavLink onClick={()=>setVisible(false)} className="py-2 pl-6 border" to='/bulkorders'>BULK-ORDERS</NavLink>
           <NavLink onClick={()=>setVisible(false)} className="py-2 pl-6 border" to='/about'>ABOUT</NavLink>
           <NavLink onClick={()=>setVisible(false)} className="py-2 pl-6 border" to='/contact'>CONTACT</NavLink>
         </div>
