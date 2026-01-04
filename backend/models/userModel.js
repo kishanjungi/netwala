@@ -42,7 +42,11 @@ const userSchema = mongoose.Schema({
 
   resetPasswordExpiry: {
     type: Date
-  }
+  },
+
+  passwordChangedAt: {
+  type: Date
+}
 
 
 }, { minimize: false });

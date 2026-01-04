@@ -42,7 +42,7 @@ function App() {
         <Route path="/placeorder" element={<Placeorder/>}></Route>
         <Route path="/orders" element={<Orders/>}></Route>
         <Route path='/verify' element={<Verify/>}></Route>
-        <Route path="/verify-email" element={<VerifyEmail/>} />
+        <Route path="/verify-email/:token" element={<VerifyEmail/>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes> 

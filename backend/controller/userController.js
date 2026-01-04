@@ -18,7 +18,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // token creation
 
   const createtoken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET);
+    return jwt.sign({ id }, process.env.JWT_SECRET,{expiresIn:"7d"});
 }
 //  user login  
 const loginUser = async (req, res) => {
@@ -111,7 +111,6 @@ const registerUser = async (req, res) => {
 
         res.json({
         success: true,
-        token,
         message: "User registered. Please verify your email."
         });
 
@@ -172,7 +171,7 @@ const resendVerificationEmail = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    if (user.isVerified) {
+    if (user.isEmailVerified) {
       return res.json({ success: true, message: "Email already verified" });
     }
 
@@ -183,18 +182,18 @@ const resendVerificationEmail = async (req, res) => {
 
     await user.save();
 
-    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    const verificationLink = `${process.env.CLIENT_URL}/verify-email/${newToken}`;
 
-    sendEmail({
-      to:user.email,
-      subject:"Reset your password",
-      html:`
-        <h2>Password Reset</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link will expire in 15 minutes.</p>
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your email",
+      html: `
+        <h2>Email Verification</h2>
+        <p>Please verify your email by clicking the link below:</p>
+        <a href="${verificationLink}">${verificationLink}</a>
+        <p>This link will expire in 24 hours.</p>
       `
-  });
+    });
 
 
     res.json({
@@ -328,7 +327,7 @@ const resetPassword = async (req, res) => {
 
     const salt = await bycrpt.genSalt(10);
     user.password = await bycrpt.hash(password, salt);
-
+    user.passwordChangedAt=Date.now();
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiry = undefined;
 

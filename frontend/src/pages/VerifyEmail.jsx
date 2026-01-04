@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate ,useParams} from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 
 const VerifyEmail = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token"); // ✅ correct
+  // const [searchParams] = useSearchParams();
+  const {token} = useParams("token"); 
   const navigate = useNavigate();
   const { backendUrl } = useContext(ShopContext);
 
@@ -38,6 +38,7 @@ const VerifyEmail = () => {
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Verifying your email...</h2>
       <p>Please wait</p>
+      <p>{token}</p>
     </div>
   );
 };
