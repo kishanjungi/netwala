@@ -5,7 +5,11 @@ import { backendUrl } from '../App'
 
 const AllUser = ({ token }) => {
 
-  const [alluser, setallUser] = useState([])
+  const [alluser, setallUser] = useState([]);
+  const totalUsers = alluser.length;
+  const adminCount = alluser.filter(user => user.isAdmin).length;
+  const normalUserCount = totalUsers - adminCount;
+
 
   const fetchUser = async () => {
     try {
@@ -37,37 +41,67 @@ const AllUser = ({ token }) => {
   }, [])
 
   return (
-    <>
-      <p className="mb-3 text-lg font-semibold">All Users</p>
+          <div className="p-4 max-w-4xl">
 
-      <div className="flex flex-col gap-2">
+            {/* TITLE */}
+            <h2 className="text-2xl font-semibold mb-4">Users</h2>
 
-        {/* Table Header */}
-        <div className="grid grid-cols-[2fr_3fr_1fr] bg-gray-100 p-2 text-sm font-semibold">
-          <p>Name</p>
-          <p>Email</p>
-          <p className="text-center">Role</p>
-        </div>
+            {/* STATS */}
+            <div className="flex gap-4 mb-6">
+              <div className="flex-1 border rounded-lg p-4 bg-white shadow-sm">
+                <p className="text-sm text-gray-500">Total Users</p>
+                <p className="text-2xl font-bold">{totalUsers}</p>
+              </div>
 
-        {/* User List */}
-        {
-          alluser.map((user, index) => (
-            <div
-              key={user._id}
-              className="grid grid-cols-[2fr_3fr_1fr] items-center border p-2 text-sm"
-            >
-              <p>{user.name}</p>
-              <p>{user.email}</p>
-              <p className="text-center">
-                {user.isAdmin ? "Admin" : "User"}
-              </p>
+              <div className="flex-1 border rounded-lg p-4 bg-white shadow-sm">
+                <p className="text-sm text-gray-500">Admins</p>
+                <p className="text-2xl font-bold text-blue-600">{adminCount}</p>
+              </div>
+
+              <div className="flex-1 border rounded-lg p-4 bg-white shadow-sm">
+                <p className="text-sm text-gray-500">Users</p>
+                <p className="text-2xl font-bold text-green-600">{normalUserCount}</p>
+              </div>
             </div>
-          ))
-        }
 
-      </div>
-    </>
-  )
+            {/* TABLE */}
+            <div className="border rounded-lg overflow-hidden">
+
+              {/* Table Header */}
+              <div className="grid grid-cols-[2fr_3fr_1fr] bg-gray-100 p-3 text-sm font-semibold">
+                <p>Name</p>
+                <p>Email</p>
+                <p className="text-center">Role</p>
+              </div>
+
+              {/* User Rows */}
+              {alluser.map((user) => (
+                <div
+                  key={user._id}
+                  className="grid grid-cols-[2fr_3fr_1fr] items-center border-t p-3 text-sm hover:bg-gray-50"
+                >
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-gray-600">{user.email}</p>
+
+                  <p className="text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold
+                        ${
+                          user.isAdmin
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                    >
+                      {user.isAdmin ? "Admin" : "User"}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        );
+
 }
 
 export default AllUser

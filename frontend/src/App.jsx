@@ -18,6 +18,8 @@ import Verify from './pages/Verify.jsx';
 import VerifyEmail from './pages/VerifyEmail.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import WhatsAppFloat from './components/WhatsAppFloat.jsx';
+import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 
 
@@ -30,12 +32,13 @@ function App() {
       <ToastContainer/>
       <Navbar/>
       <SearchBar/>
+      <LoadingSpinner/>
       <Routes>
         <Route path="/" element={<Home/>}></Route>
         <Route path="/collection" element={<Collection/>}></Route>
         <Route path='/bulkorders' element={<BulkOrder/>}></Route>
         <Route path="/about" element={<About/>}></Route>
-        <Route path="contact" element={<Contact/>}></Route>
+        {/* <Route path="contact" element={<Contact/>}></Route> */}
         <Route path="/product/:productId" element={<Prouduct/>}></Route>
         <Route path='/cart' element={<Cart/>}></Route>
         <Route path='login' element={<Login/>}></Route>
@@ -46,6 +49,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes> 
+      <WhatsAppFloat/>
       <Footer/>
     </div>
   )

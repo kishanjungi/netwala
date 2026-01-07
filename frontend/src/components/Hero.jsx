@@ -1,4 +1,4 @@
-import React from 'react'
+import {React, lazy} from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 
@@ -37,6 +37,7 @@ const Hero = () => {
         {/* Image */}
         <img
           src={assets.hero_img}
+          loading='lazy'
           alt="Trawl Fishing Nets"
           className="w-full h-full object-cover transition duration-500
                      group-hover:scale-105 group-hover:brightness-50"

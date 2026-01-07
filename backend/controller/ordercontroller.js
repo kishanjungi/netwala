@@ -70,7 +70,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // 3️⃣ Place new order
+    // Place new order
     const orderData = {
       userId,
       items,
@@ -86,11 +86,25 @@ const placeOrder = async (req, res) => {
     await newOrder.save();
 
 
-    const user = await userModel.findById(userId);
+    // const user = await userModel.findById(userId);
 
-    const invoicePDF = await generateInvoice(newOrder, user);
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-    await sendEmail({
+    res.json({
+      success: true,
+      message: "Order Placed Successfully",
+      orderId: newOrder._id
+    });
+
+
+    
+
+    setImmediate(async ()=>{
+      try{
+        const user = await userModel.findById(userId);
+        const invoicePDF = await generateInvoice(newOrder, user);
+
+        await sendEmail({
       to: user.email,
       subject: "Order Confirmation & Invoice",
       html: `
@@ -106,21 +120,26 @@ const placeOrder = async (req, res) => {
       ]
     });
 
+    await sendEmail({
+      to:process.env.ADMIN_EMAIL,
+      subject:"New Order Received",
+      html:`<h2>New Order Received</h2>
+            <p>Order id:${newOrder._id}</p>
+            <p>User:${user.email}</p>
+            <p>Amount:${newOrder.amount}</p>`
+    })
 
-    // Clear cart
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
-
-    res.json({
-      success: true,
-      message: "Order Placed Successfully"
+      }catch(error){
+        console.log("Background Email Error",error);
+      }
     });
+    
 
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
-
 
 
 const placeOrderStripe=async (req,res)=>{

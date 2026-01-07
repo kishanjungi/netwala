@@ -16,6 +16,7 @@ const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
 
@@ -25,7 +26,7 @@ const ShopContextProvider = (props) => {
         //     toast.error('Select Product Size');
         //     return
         // }
-
+        
         let cartData = structuredClone(cartItems);
         if (cartData[itemId]) {
             if (cartData[itemId][size]) {
@@ -38,7 +39,7 @@ const ShopContextProvider = (props) => {
             cartData[itemId][size] = 1;
         }
         setCartItems(cartData);
-
+        setLoading(true);
         if (token) {
             try {
 
@@ -47,12 +48,15 @@ const ShopContextProvider = (props) => {
             } catch (error) {
                 console.log(error);
                 toast.error(error.message)
+            }finally{
+                setLoading(false);
             }
         }
 
     }
 
     const getCartCount = () => {
+        
         let totalCount = 0;
 
         for (const items in cartItems) {
@@ -106,6 +110,7 @@ const ShopContextProvider = (props) => {
     }
 
     const getProducts = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(backendUrl + '/api/product/list')
 
@@ -118,6 +123,8 @@ const ShopContextProvider = (props) => {
         } catch (error) {
             console.log(error.message)
             toast.error(error.message)
+        }finally{
+            setLoading(false);
         }
     }
 
@@ -134,6 +141,7 @@ const ShopContextProvider = (props) => {
             toast.error(error.message)
         }
     }
+
 
     useEffect(() => {
 
@@ -163,7 +171,9 @@ const ShopContextProvider = (props) => {
         backendUrl,
         setToken,
         token,
-        setCartItems
+        setCartItems,
+        loading,
+        setLoading
     }
     return (
         <ShopContext.Provider value={value}>

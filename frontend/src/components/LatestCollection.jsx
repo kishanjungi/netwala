@@ -15,9 +15,9 @@ const LatestCollection = () => {
   return (
     <div className='my-10'>
       <div className='text-center py-8 text-3xl'>
-        <Title text1={'LATEST'} text2={'COLLECTION'}/>
+        <Title text1={'LATEST'} text2={'TRAWL NETS'}/>
         <p className='w-3/4 m-auto text-xs sm:text-sm md:text-base text-grey-600'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi ea, autem delectus repellat facere molestias placeat cumque quidem voluptatum ut iusto sunt distinctio necessitatibus explicabo atque illum qui hic unde.
+        We introduce our latest range of trawl fishing nets, developed based on real fishing conditions and industry experience. Each net is tested for strength and durability to ensure reliable performance, longer service life, and better results at sea.
         </p>  
       </div>
 

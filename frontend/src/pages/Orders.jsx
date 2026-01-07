@@ -9,8 +9,11 @@ const orders = () => {
 
   const { currency, backendUrl, token } = useContext(ShopContext);
   const [orderData, setOrderData] = useState([])
+  const [loading,setLoading]=useState(false);
 
   const loadOrder = async () => {
+
+    setLoading(true);
     try {
       if (!token) {
         return null;
@@ -31,12 +34,14 @@ const orders = () => {
         setOrderData(allOrdersItems.reverse());
       }
     } catch (error) {
-
+      console.log(error);
+       toast.error(error.message)
+    }finally{
+      setLoading(false);
     }
   }
   useEffect(() => {
     loadOrder();
-
   }, [token])
 
   return (

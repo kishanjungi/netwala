@@ -1,5 +1,6 @@
 import React from 'react'
 import { assets } from '../assets/assets'
+import { NavLink } from 'react-router-dom'
 
 const Footer = () => {
   return (
@@ -8,25 +9,25 @@ const Footer = () => {
           <div >
             <img src={assets.logo} className='mb-5 w-32' alt="" />
             <p className='w-full md:w-2/3 text-grey-600'>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione rem fugit illo ut corrupti ducimus totam ab reiciendis? Mollitia laboriosam dignissimos excepturi incidunt consequuntur fugiat eius veritatis fuga ea voluptatum!
+              Netwala Firm is a trusted manufacturer of trawl fishing nets with over 20 years of experience in the fishing industry. We specialize in producing strong, reliable nets and continuously develop new net designs based on specific requirements and special requests from fishermen.
             </p>
           </div>
 
         <div>
           <p className='text-xl font-medium mb-5'>COMPANY</p>
           <ul className='flex flex-col gap-1 text-grey-600'>
-            <li>Home</li>
-            <li>About us</li>
-            <li>Delivery</li>
-            <li>Privacy Policy</li>
+          <NavLink onClick={() => window.scrollTo(0, 0)} to='/'>HOME</NavLink>
+          <NavLink onClick={() => window.scrollTo(0, 0)} to='/collection'>PRODUCTS</NavLink>
+          <NavLink onClick={() => window.scrollTo(0, 0)} to='/bulkorders'>BULK-ORDERS</NavLink>
+          <NavLink onClick={() => window.scrollTo(0, 0)} to='/about'>ABOUT</NavLink>
           </ul>
         </div>
 
         <div>
           <p className='text-xl font-medium mb-5'> GET IN TOUCH</p>
           <ul className='flex flex-col gap-1 text-grey-600'>
-            <li>+91-991-235-9815</li>
-            <li>contact@kgjungi.com</li>
+            <li>+91-992-543-6667</li>
+            <li>contact@kishan.jungi.tech@gmail.com</li>
           </ul>
         </div>
 
@@ -34,7 +35,7 @@ const Footer = () => {
 
         <div>
           <hr />
-          <p className='py-5 text-sm text-center'>Copyright 2025@forever.com-All Right Reserved</p>
+          <p className='py-5 text-sm text-center'>Copyright 2026 @netwala.com-All Right Reserved</p>
         </div>
     </div>
   )

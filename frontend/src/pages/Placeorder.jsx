@@ -9,6 +9,7 @@ import {toast} from 'react-toastify';
 const placeorder = () => {
 
   const [method, setMethod] = useState('cod');
+  const[placingOrderloading,setPlacingOrderloading]=useState(false);
 
   const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
 
@@ -61,6 +62,7 @@ const placeorder = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault()
+    setPlacingOrderloading(true);
     try {
       let orderItems = [];
 
@@ -118,6 +120,8 @@ const placeorder = () => {
     } catch (error) {
       console.log(error);
       toast.error(error.message)
+    }finally{
+      setPlacingOrderloading(false);
     }
   }
 
@@ -170,7 +174,22 @@ const placeorder = () => {
             </div>
           </div>
           <div className='w-full text-end mt-8'>
-            <button type='submit' className='bg-black text-white px-16 py-4 text-sm active:bg-gray-700'>PLACE ORDER</button>
+           <button
+            type="submit"
+            disabled={placingOrderloading}
+            className={`bg-black text-white px-16 py-4 text-sm flex items-center justify-center gap-2
+              ${placingOrderloading ? 'opacity-70 cursor-not-allowed' : 'active:bg-gray-700'}`}
+          >
+            {placingOrderloading ? (
+              <>
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                PLACING ORDER...
+              </>
+            ) : ( 
+              'PLACE ORDER'
+            )}
+          </button>
+
           </div>
 
         </div>
