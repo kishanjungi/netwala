@@ -7,7 +7,7 @@ import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import redis from "../config/redis.js";
-
+import logger from "../utils/logger.js";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -17,115 +17,145 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // token creation
 
-  const createtoken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET,{expiresIn:"7d"});
+const createtoken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 }
 //  user login  
 const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ email });
 
-        if (!user) {
-            return res.json({ success: false, message: "user doesn't exist" });
-        }
-
-        if (!user.isEmailVerified) {
-            return res.json({
-              success: false,
-              message: "Please verify your email first"
-            });
-          }
-
-        const isMatch = await bycrpt.compare(password, user.password);
-
-        if (isMatch) {
-            const token = createtoken(user._id);
-            res.json({ success: true, token })
-        } else {
-            res.json({ success: false, message: "Invalid Credentials" })
-        }
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message })
+    if (!user) {
+      return res.json({ success: false, message: "user doesn't exist" });
     }
+
+    if (!user.isEmailVerified) {
+      return res.json({
+        success: false,
+        message: "Please verify your email first"
+      });
+    }
+
+    const isMatch = await bycrpt.compare(password, user.password);
+
+    if (isMatch) {
+      const token = createtoken(user._id);
+      res.json({ success: true, token })
+      logger.info("user login successfully", {
+        userId: user._id,
+        email: user.email
+      })
+
+    } else {
+      res.json({ success: false, message: "Invalid Credentials" })
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message })
+
+    logger.warn("Login crashed", {
+      message: error.message,
+      stack: error.stack
+    })
+
+
+  }
 }
 
 
 //  user register user
 const registerUser = async (req, res) => {
 
-    try {
-        const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-        const exists = await userModel.findOne({ email });
+    const exists = await userModel.findOne({ email });
 
-        if (exists) {
-            return res.json({ success: false, message: "User Already exists" });
-        }
+    if (exists) {
+      return res.json({ success: false, message: "User Already exists" });
+    }
 
-        if (!validator.isEmail(email)) {
-            return res.json({ success: false, message: "Please enter a valid Email" });
-        }
+    if (!validator.isEmail(email)) {
+      return res.json({ success: false, message: "Please enter a valid Email" });
+    }
 
-        if (password.length < 8) {
-            return res.json({ success: false, message: "Enter a strong password" });
+    if (password.length < 8) {
+      return res.json({ success: false, message: "Enter a strong password" });
 
-        }
+    }
 
-        // hasing the password
-        const salt = await bycrpt.genSalt(10);
-        const hasedPassword = await bycrpt.hash(password, salt)
+    // hasing the password
+    const salt = await bycrpt.genSalt(10);
+    const hasedPassword = await bycrpt.hash(password, salt)
 
-       // generate email verification token
-        const verificationToken = crypto.randomBytes(32).toString("hex");
+    // generate email verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
 
-     const newUser = new userModel({
-        name,
-        email,
-        password: hasedPassword,
-        verificationToken,
-        verificationTokenExpiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+    const newUser = new userModel({
+      name,
+      email,
+      password: hasedPassword,
+      verificationToken,
+      verificationTokenExpiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
     });
 
 
-        const user = await newUser.save();
+    const user = await newUser.save();
 
-        const token = createtoken(user._id);
+    logger.info("User registered", {
+      userId: user._id,
+      email: user.email
+    });
 
-// send verification email (non-blocking)
-        const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+    const token = createtoken(user._id);
 
-        sendEmail({
-          to:user.email,
-          subject:"Verify your email",
-         html: `
+    // send verification email (non-blocking)
+    const verificationLink = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+    try {
+      sendEmail({
+        to: user.email,
+        subject: "Verify your email",
+        html: `
             <h2>Email Verification</h2>
             <p>Click the link below to verify your email:</p>
             <a href="${verificationLink}">${verificationLink}</a>
             <p>This link will expire in 24 hours.</p>
           `
+      });
+    } catch (emailerror) {
+      logger.error("Verification email failed", {
+        userId: user._id,
+        email: user.email,
+        error: emailerror.message
+      });
+    }
+
+
+    res.json({
+      success: true,
+      message: "User registered. Please verify your email."
     });
 
 
-        res.json({
-        success: true,
-        message: "User registered. Please verify your email."
-        });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message })
 
-
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message })
-    }
+    logger.error("Registeration failed", {
+      userId: user._id,
+      email: user.email,
+      error: error.message
+    });
+  }
 
 
 
 }
 
 
-
+//verify email
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
@@ -147,6 +177,11 @@ const verifyEmail = async (req, res) => {
     user.verificationTokenExpiry = undefined;
 
     await user.save();
+
+    logger.info("user login successfully", {
+      userId: user._id,
+      email: user.email
+    })
 
     res.json({
       success: true,
@@ -194,7 +229,10 @@ const resendVerificationEmail = async (req, res) => {
         <p>This link will expire in 24 hours.</p>
       `
     });
-
+    logger.info("Verification email resent", {
+      userId: user._id,
+      email: user.email
+    });
 
     res.json({
       success: true,
@@ -202,6 +240,11 @@ const resendVerificationEmail = async (req, res) => {
     });
 
   } catch (error) {
+
+    logger.error("Email verification failed", {
+      error: error.message,
+      stack: error.stack
+    });
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
@@ -209,8 +252,8 @@ const resendVerificationEmail = async (req, res) => {
 
 // forgot password function
 
-const MAX_ATTEMPTS=3;
-const WINDOW_TIME=15*60;
+const MAX_ATTEMPTS = 3;
+const WINDOW_TIME = 15 * 60;
 
 
 const forgotPassword = async (req, res) => {
@@ -231,7 +274,7 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-     //  DB LOOKUP
+    //  DB LOOKUP
     const user = await userModel
       .findOne({ email })
       .select("_id email isGoogleUser");
@@ -252,7 +295,7 @@ const forgotPassword = async (req, res) => {
       .digest("hex");
 
     // save hashed token
-     await userModel.updateOne(
+    await userModel.updateOne(
       { _id: user._id },
       {
         resetPasswordToken: hashedToken,
@@ -266,6 +309,10 @@ const forgotPassword = async (req, res) => {
     res.json({
       success: true,
       message: "If this email exists, a reset link has been sent"
+    });
+
+    logger.info("Password reset requested", {
+      emailHash: crypto.createHash("sha256").update(email).digest("hex")
     });
 
 
@@ -285,9 +332,12 @@ const forgotPassword = async (req, res) => {
         console.error("Email error:", err.message);
       }
     });
-    
+
   } catch (error) {
-    console.log(error);
+    logger.error("Password reset email failed", {
+      userId: user._id,
+      error: err.message
+    });
     res.status(500).json({
       success: false,
       message: "Server Error"
@@ -309,13 +359,13 @@ const resetPassword = async (req, res) => {
     }
 
     const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
     const user = await userModel.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpiry: { $gt: Date.now()}
+      resetPasswordExpiry: { $gt: Date.now() }
     });
 
     if (!user) {
@@ -327,11 +377,16 @@ const resetPassword = async (req, res) => {
 
     const salt = await bycrpt.genSalt(10);
     user.password = await bycrpt.hash(password, salt);
-    user.passwordChangedAt=Date.now();
+    user.passwordChangedAt = Date.now();
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiry = undefined;
 
     await user.save();
+
+    logger.warn("Password reset successful", {
+      userId: user._id,
+      email: user.email
+    });
 
     res.json({
       success: true,
@@ -351,56 +406,74 @@ const resetPassword = async (req, res) => {
 
 //  user admin login
 const adminLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body
-        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const token = jwt.sign(email + password,process.env.JWT_SECRET)
-            res.json({ success: true, token })
-        } else {
-            res.json({ success: false, message: "Invalid Credentials" })
-        }
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message })
+  try {
+    const { email, password } = req.body
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      const token = jwt.sign(email + password, process.env.JWT_SECRET)
+
+      logger.info("Admin login success", {
+        email
+      });
+
+      res.json({ success: true, token })
+    } else {
+      res.json({ success: false, message: "Invalid Credentials" })
     }
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message })
+
+    logger.warn("Admin login failed", {
+      email,
+      ip: req.ip
+    });
+
+  }
 }
 
 
 const googleLogin = async (req, res) => {
-    try {
-        const { token } = req.body;
+  try {
+    const { token } = req.body;
 
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
 
-        const { name, email } = ticket.getPayload();
+    const { name, email } = ticket.getPayload();
 
-        let user = await userModel.findOne({ email });
+    let user = await userModel.findOne({ email });
 
-        if (!user) {
-            user = await userModel.create({
-                name,
-                email,
-                isGoogleUser: true
-            });
-        }
-
-        const jwtToken = createtoken(user._id);
-
-        res.json({
-            success: true,
-            token: jwtToken
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.status(401).json({
-            success: false,
-            message: "Google authentication failed"
-        });
+    if (!user) {
+      user = await userModel.create({
+        name,
+        email,
+        isGoogleUser: true
+      });
     }
+
+    const jwtToken = createtoken(user._id);
+
+    res.json({
+      success: true,
+      token: jwtToken
+    });
+
+    logger.info("New Google user registered", {
+      userId: user._id,
+      email: user.email
+    });
+
+  } catch (error) {
+    logger.error("Google login failed", {
+      error: error.message
+    });
+    res.status(401).json({
+      success: false,
+      message: "Google authentication failed"
+    });
+  }
 };
 
 export {

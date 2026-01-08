@@ -1,0 +1,3 @@
+{"level":"info","message":"Server running on port 3000","timestamp":"2026-01-08 19:40:53"}
+{"amount":35010,"level":"info","message":"Order placed","orderId":"695fc36b05443cd10801eb51","paymentMethod":"COD","timestamp":"2026-01-08 20:17:08","userId":"695a793a50d1e9595ff514c7"}
+{"level":"info","message":"Order email sent","orderId":"695fc36b05443cd10801eb51","timestamp":"2026-01-08 20:17:15","userEmail":"kishan.jungi.tech@gmail.com"}

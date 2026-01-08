@@ -8,11 +8,14 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import authRoutes from "./routes/authRoute.js"; 
 import alluserRoute from "./routes/alluserRoute.js";
-
 import "./config/googleAuth.js";
+import logger from "./utils/logger.js";
 
 import session from "express-session";
 import passport from "passport";
+import morgan from "morgan";
+import morganStream from "./utils/morganStream.js";
+import requestId from "./middleware/requestId.js";
 // import product from "../frontend/src/pages/Product";
 
 
@@ -48,6 +51,13 @@ app.use("/api/alluser",alluserRoute);
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(requestId);
+app.use(  
+  morgan("combined",{stream:morganStream})
+)
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  logger.info(`Server running on port ${port}`)
 });
+

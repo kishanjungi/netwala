@@ -49,6 +49,11 @@ const orders = () => {
       <div className='text-2xl'>
         <Title text1={'MY'} text2={'ORDERS'} />
       </div>
+      <p className="mt-3 text-sm text-gray-500">
+        🚚 Orders are usually delivered within{" "}
+        <span className="font-medium text-gray-700">10 – 15 days</span>{" "}
+        from the order date.
+      </p>
 
       <div>
         {
