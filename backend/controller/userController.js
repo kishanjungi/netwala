@@ -8,6 +8,7 @@ import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import redis from "../config/redis.js";
 import logger from "../utils/logger.js";
+import Sentry from '../utils/sentry.js';
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -52,7 +53,8 @@ const loginUser = async (req, res) => {
       res.json({ success: false, message: "Invalid Credentials" })
     }
   } catch (error) {
-    console.log(error);
+    
+    Sentry.captureException(error);
     res.status(500).json({ success: false, message: error.message })
 
     logger.warn("Login crashed", {
@@ -141,6 +143,7 @@ const registerUser = async (req, res) => {
 
   } catch (error) {
     console.log(error);
+    Sentry.captureException(error);
     res.json({ success: false, message: error.message })
 
     logger.error("Registeration failed", {
@@ -190,6 +193,7 @@ const verifyEmail = async (req, res) => {
 
   } catch (error) {
     console.log(error);
+    Sentry.captureException(error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -245,6 +249,7 @@ const resendVerificationEmail = async (req, res) => {
       error: error.message,
       stack: error.stack
     });
+    Sentry.captureException(error);
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
@@ -334,6 +339,7 @@ const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
+
     logger.error("Password reset email failed", {
       userId: user._id,
       error: err.message
@@ -342,6 +348,7 @@ const forgotPassword = async (req, res) => {
       success: false,
       message: "Server Error"
     });
+    Sentry.captureException(error);
   }
 };
 
@@ -394,6 +401,7 @@ const resetPassword = async (req, res) => {
     });
 
   } catch (error) {
+    Sentry.captureException(error);
     console.log(error);
     res.status(500).json({
       success: false,
@@ -420,6 +428,7 @@ const adminLogin = async (req, res) => {
       res.json({ success: false, message: "Invalid Credentials" })
     }
   } catch (error) {
+    Sentry.captureException(error);
     console.log(error);
     res.json({ success: false, message: error.message })
 
