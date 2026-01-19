@@ -1,94 +1,153 @@
-import {v2 as cloudinary} from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import productModel from '../models/productModel.js';
 // function for add products
-const addProduct=async (req,res)=>{
+const addProduct = async (req, res) => {
 
-    try{
-        
-    const {name,description,description1,description2,description3,description4,price,bestseller}=req.body;
+    try {
 
-    const image1=req.files.image1 && req.files.image1[0];
-    const image2=req.files.image2 && req.files.image2[0];
-    const image3=req.files.image3 && req.files.image3[0];
-    const image4=req.files.image4 && req.files.image4[0];
+        const { name, description, description1, description2, description3, description4, price, stock, bestseller } = req.body;
 
-    const images=[image1,image2,image3,image4].filter((item)=> item !== undefined )
+        if (stock === undefined || stock < 0) {
+            return res.json({
+                success: false,
+                message: "Stock is required and cannot be negative"
+            });
+        }
+        const image1 = req.files.image1 && req.files.image1[0];
+        const image2 = req.files.image2 && req.files.image2[0];
+        const image3 = req.files.image3 && req.files.image3[0];
+        const image4 = req.files.image4 && req.files.image4[0];
 
-    let imagesUrl=await Promise.all(
-        images.map(async (item)=>{
-            let result=await cloudinary.uploader.upload(item.path,{resource_type:"image"})
-            return result.secure_url
-        })
-    )
+        const images = [image1, image2, image3, image4].filter((item) => item !== undefined)
 
-    const productData={
-        name,
-        description,
-        description1,
-        description2,
-        description3,
-        description4,
-        price:Number(price),
-        bestseller: bestseller === "true" ? true : false,
-        image:imagesUrl,
-        date:Date.now()
-    }
+        let imagesUrl = await Promise.all(
+            images.map(async (item) => {
+                let result = await cloudinary.uploader.upload(item.path, { resource_type: "image" })
+                return result.secure_url
+            })
+        )
 
-    console.log(productData);
+        const productData = {
+            name,
+            description,
+            description1,
+            description2,
+            description3,
+            description4,
+            price: Number(price),
+            bestseller: bestseller === "true" ? true : false,
+            stock: Number(stock),
+            isActive: Number(stock) > 0,
+            image: imagesUrl,
+            date: Date.now()
+        }
 
-    const prodct=new productModel(productData);
-    await prodct.save()
+        console.log(productData);
 
-    res.json({success:true,message:"product Added"});
+        const prodct = new productModel(productData);
+        await prodct.save()
+
+        res.json({ success: true, message: "product Added" });
 
 
 
 
-    }catch(error){
+    } catch (error) {
         console.log(error);
-        res.json({success:false,message:error.message})
+        res.json({ success: false, message: error.message })
     }
-    
+
 
 
 }
 
 
 // function for list products
-const listProduct=async (req,res)=>{
-    try{
-        const products=await productModel.find({});
-        res.json({success:true,products});
-    }catch(error){
+const listProduct = async (req, res) => {
+    try {
+        const products = await productModel.find({});
+        res.json({ success: true, products });
+    } catch (error) {
         console.log(error);
-        res.json({success:false,message:error.message})
+        res.json({ success: false, message: error.message })
     }
 }
 
 // function for remove product
-const removeProduct=async (req,res)=>{
-    try{
+const removeProduct = async (req, res) => {
+    try {
         await productModel.findByIdAndDelete(req.body.id);
-        res.json({success:true,message:"Product Removed"});
-    }catch(error){
+        res.json({ success: true, message: "Product Removed" });
+    } catch (error) {
         console.log(error);
-        res.json({success:false,message:error.message})
+        res.json({ success: false, message: error.message })
     }
 }
 
 // function for show single prosuct
-const singleProduct=async (req,res)=>{
-    try{
-    const {productId}=req.body;
-    const product= await productModel.findById(productId);
-    res.json({success:true,product});
+const singleProduct = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const product = await productModel.findById(productId);
+        res.json({ success: true, product });
 
-    }catch(error){
-            console.log(error);
-        res.json({success:false,message:error.message})
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message })
     }
 
-    
+
 }
 
-export {addProduct,listProduct,removeProduct,singleProduct} 
+
+//product stock update
+const updatedProductStock = async (req, res) => {
+    try {
+        const { productId, stock } = req.body;
+
+        if (stock < 0) {
+            return res.json({
+                success: false,
+                message: "Stock can not be Negative"
+            });
+        }
+
+        const product = await productModel.findByIdAndUpdate(
+            productId,
+            {
+                stock,
+                isActive: stock > 0
+            },
+            { new: true }
+        );
+
+        if (!product) {
+            return res.json({
+                success: false,
+                message: "Product not Found"
+            })
+        }
+
+        logger.info("stock update by admin", {
+            productId,
+            stock
+        })
+
+        res.json({
+            success: true,
+            message: "Stock updated successfully",
+            product
+        });
+    } catch (error) {
+        logger.error("Stock update failed", {
+            error: error.message
+        });
+
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        });
+    }
+}
+
+export { addProduct, listProduct, removeProduct, singleProduct ,updatedProductStock} 

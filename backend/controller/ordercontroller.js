@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import razorpay from 'razorpay';
 import { sendEmail } from '../utils/sendEmail.js';
 import { generateInvoice } from '../utils/generateInvoice.js';
+import productModel from '../models/productModel.js';
 import logger from "../utils/logger.js";
 const currency = "inr"
 const deliverycharges = 10
@@ -80,6 +81,48 @@ const placeOrder = async (req, res) => {
       });
     }
 
+    for (const item of items) {
+      if (!item.quantity || Number(item.quantity) <= 0) {
+        return res.json({
+          success: false,
+          message: "Invalid item quantity"
+        });
+      }
+    }
+
+    //stock check and reduce
+    for (const item of items) {
+      const product = await productModel.findById(item._id);
+
+      if (!product) {
+        return res.json({
+          success: false,
+          message: "Product not found"
+        });
+      }
+
+      if (product.stock < Number(item.quantity)) {
+        return res.json({
+          success: false,
+          message: `${product.name} is out of stock`
+        });
+      }
+    }
+
+    /* 5️⃣ REDUCE STOCK */
+    for (const item of items) {
+      const updatedProduct = await productModel.findByIdAndUpdate(
+        item._id,
+        { $inc: { stock: -Number(item.quantity) } },
+        { new: true }
+      );
+
+      if (updatedProduct.stock <= 0) {
+        updatedProduct.isActive = false;
+        await updatedProduct.save();
+      }
+    }
+
     // Place new order
     const orderData = {
       userId,
@@ -101,6 +144,14 @@ const placeOrder = async (req, res) => {
       paymentMethod: "COD",
       amount
     });
+
+
+    // Auto-disable product if stock is 0
+    // if (updatedProduct.stock <= 0) {
+    //   updatedProduct.isActive = false;
+    //   await updatedProduct.save();
+    // }
+
 
 
 
@@ -152,18 +203,24 @@ const placeOrder = async (req, res) => {
         });
 
       } catch (error) {
-        logger.info("Order email sent", {
+        logger.error("Order email failed", {
           orderId: newOrder._id,
           userEmail: user.email
         });
         console.log("Background Email Error", error);
       }
     });
+    console.log("ORDER ITEMS:", items);
 
 
   } catch (error) {
+    logger.error("Order placement failed", {
+      error: error.message,
+      stack: error.stack,
+    });
+
     console.log(error);
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
