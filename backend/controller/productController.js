@@ -1,6 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from '../models/productModel.js';
+import logger from "../utils/logger.js";
+
 // function for add products
+
 const addProduct = async (req, res) => {
 
     try {
@@ -102,52 +105,56 @@ const singleProduct = async (req, res) => {
 
 //product stock update
 const updatedProductStock = async (req, res) => {
-    try {
-        const { productId, stock } = req.body;
+  try {
+    const { productId, stock } = req.body;
 
-        if (stock < 0) {
-            return res.json({
-                success: false,
-                message: "Stock can not be Negative"
-            });
-        }
-
-        const product = await productModel.findByIdAndUpdate(
-            productId,
-            {
-                stock,
-                isActive: stock > 0
-            },
-            { new: true }
-        );
-
-        if (!product) {
-            return res.json({
-                success: false,
-                message: "Product not Found"
-            })
-        }
-
-        logger.info("stock update by admin", {
-            productId,
-            stock
-        })
-
-        res.json({
-            success: true,
-            message: "Stock updated successfully",
-            product
-        });
-    } catch (error) {
-        logger.error("Stock update failed", {
-            error: error.message
-        });
-
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong"
-        });
+    if (stock < 0) {
+      return res.json({
+        success: false,
+        message: "Stock cannot be negative"
+      });
     }
-}
+
+    const product = await productModel.findByIdAndUpdate(
+      productId,
+      {
+        stock: Number(stock),
+        isActive: Number(stock) > 0
+      },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    // Safe logging
+    try {
+      logger.info("Stock updated by admin", {
+        productId: product._id.toString(),
+        stock: product.stock
+      });
+    } catch (e) {
+      console.error("Logger failed:", e.message);
+    }
+
+    return res.json({
+      success: true,
+      message: "Stock updated successfully",
+      product
+    });
+
+  } catch (error) {
+    console.error("Stock update error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 export { addProduct, listProduct, removeProduct, singleProduct ,updatedProductStock} 
