@@ -1,13 +1,14 @@
 import Redis from "ioredis";
 
-const redis=new Redis({
-    host:"127.0.0.1",
-    port:6379
+// Use environment variable for cloud Redis URL
+const redis = new Redis(process.env.REDIS_URL);
+
+redis.on("connect", () => {
+  console.log("Redis Connected");
 });
 
-
-redis.on("connect",()=>{
-    console.log("Redis Connected");
+redis.on("error", (err) => {
+  console.error("Redis connection error:", err);
 });
 
 export default redis;
