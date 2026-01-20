@@ -26,7 +26,7 @@ import morganStream from "./utils/morganStream.js";
 import requestId from "./middleware/requestId.js";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 5000;
 
 /* ======================
    DATABASE

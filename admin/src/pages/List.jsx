@@ -55,7 +55,7 @@ const List = ({ token }) => {
         `${backendUrl}/api/product/remove`,
         { id },
         { headers: { token } }
-      )
+      ) 
 
       if (res.data.success) {
         toast.success(res.data.message)
