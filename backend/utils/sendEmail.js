@@ -1,15 +1,7 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import "dotenv/config";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async ({
   to,
@@ -18,12 +10,15 @@ export const sendEmail = async ({
   attachments = []
 }) => {
   try {
-    await transporter.sendMail({
-      from: `"Netwala" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: "Netwala <onboarding@resend.dev>", // works without domain setup
       to,
       subject,
       html,
-      attachments
+      attachments: attachments.map(file => ({
+        filename: file.filename,
+        content: file.content, // Buffer or base64
+      })),
     });
   } catch (error) {
     console.log("Email send error:", error);
