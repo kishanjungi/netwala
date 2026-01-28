@@ -11,13 +11,13 @@ export const sendEmail = async ({
 }) => {
   try {
     await resend.emails.send({
-      from: "Netwala <onboarding@resend.dev>", // works without domain setup
+      from: "Netwala <onboarding@resend.dev>", 
       to,
       subject,
       html,
       attachments: attachments.map(file => ({
         filename: file.filename,
-        content: file.content, // Buffer or base64
+        content: file.content, 
       })),
     });
   } catch (error) {
