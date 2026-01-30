@@ -64,3 +64,4 @@
 {"level":"error","message":"Unhandled error logger is not defined","requestId":"8e6227aa-3369-4ba2-a6b3-f387cf723eca","stack":"ReferenceError: logger is not defined\n    at updatedProductStock (file:///C:/Users/kisha/Desktop/netwala/backend/controller/productController.js:142:9)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2026-01-19 13:09:01"}
 {"level":"info","message":"Server running on port 3000","timestamp":"2026-01-20 18:54:30"}
 {"level":"info","message":"Stock updated by admin","productId":"694d2df014b073fb2df90fc9","stock":8,"timestamp":"2026-01-20 18:55:23"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-01-30 18:24:29"}
