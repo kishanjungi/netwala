@@ -48,7 +48,7 @@ const placeOrder = async (req, res) => {
     // location vrification
     const userCity=address.city.trim().toLowerCase();
 
-    const isAlowed=valid_location.include(userCity);
+    const isAlowed=valid_location.includes(userCity);
 
     if(!isAlowed){
       return res.status(403).json({
