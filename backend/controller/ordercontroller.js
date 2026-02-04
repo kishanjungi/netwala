@@ -41,11 +41,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 //     }
 // }
 
+const valid_location=["porbandar","veraval","dwaraka","okha","diu","vanakbara"];
 const placeOrder = async (req, res) => {
   try {
     const { userId, items, amount, address } = req.body;
+    // location vrification
+    const userCity=address.city.trim().toLowerCase();
 
-    // 1️⃣ Quantity limit per order
+    const isAlowed=valid_location.include(userCity);
+
+    if(!isAlowed){
+      return res.status(403).json({
+        success:false,
+        message:"Delivery not Available in your area"
+      });
+    }
+
+    //  Quantity limit per order
     const orderQty = items.reduce(
       (sum, item) => sum + item.quantity,
       0
