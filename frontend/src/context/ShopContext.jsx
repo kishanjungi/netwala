@@ -18,7 +18,7 @@ const ShopContextProvider = (props) => {
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [user, setUser] = useEffect(null);
+    const [user, setUser] = useState(null);
 
     const addToCart = async (itemId, size) => {
 
@@ -148,6 +148,7 @@ const ShopContextProvider = (props) => {
 
             if (response.data.success) {
                 setUser(response.data.user);
+                
             }
         } catch (error) {
             console.log(error.message);
