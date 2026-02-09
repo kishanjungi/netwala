@@ -1,4 +1,5 @@
 import express from 'express';
+import authUser from '../middleware/auth.js';
 import {
   loginUser,
   adminLogin,
@@ -20,7 +21,7 @@ userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/admin', adminLogin);
 userRouter.post('/google-login', googleLogin);
-userRouter.get('/profile',auth,profileinfo);
+userRouter.get('/profile',authUser,profileinfo);
 
 // Email verification routes
 userRouter.get('/verify-email/:token', verifyEmail);
