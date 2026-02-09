@@ -144,7 +144,7 @@ const ShopContextProvider = (props) => {
 
     const getUserProfile = async (token) => {
         try {
-            const response = await axios.get(backendUrl + '/api/user/profile',{}, { headers: { token } });
+            const response = await axios.get(backendUrl + '/api/user/profile', { headers: { token } });
 
             if (response.data.success) {
                 setUser(response.data.user);
