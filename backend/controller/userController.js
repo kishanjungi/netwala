@@ -442,7 +442,7 @@ const adminLogin = async (req, res) => {
 //userprofile info name and email
 const profileinfo = async (req, res) => {
   try {
-    const user = await userModel.findById(req.userId).select("name email");
+    const user = await userModel.findById(req.user._id).select("name email");
 
     res.json({
       success: true,
