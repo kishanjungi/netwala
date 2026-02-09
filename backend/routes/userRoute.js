@@ -7,7 +7,8 @@ import {
   verifyEmail,
   resendVerificationEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  profileinfo
 } from '../controller/userController.js';
 
 import auth from '../middleware/auth.js';
@@ -19,6 +20,7 @@ userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/admin', adminLogin);
 userRouter.post('/google-login', googleLogin);
+userRouter.get('/profile',auth,profileinfo);
 
 // Email verification routes
 userRouter.get('/verify-email/:token', verifyEmail);

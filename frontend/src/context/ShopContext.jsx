@@ -18,7 +18,7 @@ const ShopContextProvider = (props) => {
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
+    const [user, setUser] = useEffect(null);
 
     const addToCart = async (itemId, size) => {
 
@@ -26,7 +26,7 @@ const ShopContextProvider = (props) => {
         //     toast.error('Select Product Size');
         //     return
         // }
-        
+
         let cartData = structuredClone(cartItems);
         if (cartData[itemId]) {
             if (cartData[itemId][size]) {
@@ -48,7 +48,7 @@ const ShopContextProvider = (props) => {
             } catch (error) {
                 console.log(error);
                 toast.error(error.message)
-            }finally{
+            } finally {
                 setLoading(false);
             }
         }
@@ -56,7 +56,7 @@ const ShopContextProvider = (props) => {
     }
 
     const getCartCount = () => {
-        
+
         let totalCount = 0;
 
         for (const items in cartItems) {
@@ -123,7 +123,7 @@ const ShopContextProvider = (props) => {
         } catch (error) {
             console.log(error.message)
             toast.error(error.message)
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
@@ -142,6 +142,19 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const getUserProfile = async (token) => {
+        try {
+            const response = await axios.get(backendUrl + "/api/user/profile", { headers: { token } });
+
+            if (response.data.success) {
+                setUser(response.data.user);
+            }
+        } catch (error) {
+            console.log(error.message);
+            toast.error("Failed to load user profile");
+        }
+    }
+
 
     useEffect(() => {
 
@@ -149,11 +162,14 @@ const ShopContextProvider = (props) => {
     }, [])
 
     useEffect(() => {
-        if (!token && localStorage.getItem('token')) {
-            setToken(localStorage.getItem('token'))
-            getUserCart(localStorage.getItem('token'))
+        const storedToken = localStorage.getItem('token');
+        if (!token && storedToken) {
+            setToken(storedToken);
+            getUserCart(storedToken);
+            getUserProfile(storedToken);
         }
-    }, [])
+    }, []);
+
     const value = {
         products,
         currency,
@@ -173,7 +189,8 @@ const ShopContextProvider = (props) => {
         token,
         setCartItems,
         loading,
-        setLoading
+        setLoading,
+        user
     }
     return (
         <ShopContext.Provider value={value}>

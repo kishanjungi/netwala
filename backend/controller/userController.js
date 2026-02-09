@@ -53,7 +53,7 @@ const loginUser = async (req, res) => {
       res.json({ success: false, message: "Invalid Credentials" })
     }
   } catch (error) {
-    
+
     Sentry.captureException(error);
     res.status(500).json({ success: false, message: error.message })
 
@@ -439,7 +439,22 @@ const adminLogin = async (req, res) => {
 
   }
 }
+//userprofile info name and email
+const profileinfo = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.userId).select("name email");
 
+    res.json({
+      success: true,
+      user
+    })
+  } catch (error) {
+    res.json({
+      success: false,
+      message: "Failed to load profile"
+    });
+  }
+}
 
 const googleLogin = async (req, res) => {
   try {
@@ -493,5 +508,6 @@ export {
   verifyEmail,
   resendVerificationEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  profileinfo
 };
