@@ -102,7 +102,7 @@ const navbar = () => {
   )}
 
   {/* ✅ PROFILE CARD RENDER */}
-  {showProfileCard && user && <ProfileCard user={user} />}
+  {showProfileCard && user && <Profilecard user={user} />}
 </div>
 
 
