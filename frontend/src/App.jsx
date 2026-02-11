@@ -1,58 +1,67 @@
-import React from 'react';
-import { Routes,Route } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
-import Home from './pages/Home.jsx';
-import Collection from './pages/Collection.jsx';
-import BulkOrder from './pages/BulkOrder.jsx';
-import About from './pages/About.jsx';
-import Contact from './pages/Contact.jsx';
-import Prouduct from './pages/Product.jsx';
-import Cart from './pages/Cart.jsx';
-import Login from './pages/Login.jsx';
-import Orders from './pages/Orders.jsx';
-import Placeorder from './pages/Placeorder.jsx';
-import Footer from './components/Footer.jsx';
-import SearchBar from './components/SearchBar.jsx';
-import { ToastContainer, toast } from 'react-toastify';
-import Verify from './pages/Verify.jsx';
-import VerifyEmail from './pages/VerifyEmail.jsx';
-import ForgotPassword from './pages/ForgotPassword.jsx';
-import ResetPassword from './pages/ResetPassword.jsx';
-import WhatsAppFloat from './components/WhatsAppFloat.jsx';
-import LoadingSpinner from './components/LoadingSpinner.jsx';
+import React, { Suspense, lazy } from "react";
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
+// Core layout (load immediately)
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
+import SearchBar from "./components/SearchBar.jsx";
+import LoadingSpinner from "./components/LoadingSpinner.jsx";
 
+// Lazy-loaded pages
+const Home = lazy(() => import("./pages/Home.jsx"));
+const Collection = lazy(() => import("./pages/Collection.jsx"));
+const BulkOrder = lazy(() => import("./pages/BulkOrder.jsx"));
+const About = lazy(() => import("./pages/About.jsx"));
+const Product = lazy(() => import("./pages/Product.jsx"));
+const Cart = lazy(() => import("./pages/Cart.jsx"));
+const Login = lazy(() => import("./pages/Login.jsx"));
+const Orders = lazy(() => import("./pages/Orders.jsx"));
+const Placeorder = lazy(() => import("./pages/Placeorder.jsx"));
+const Verify = lazy(() => import("./pages/Verify.jsx"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail.jsx"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword.jsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.jsx"));
 
+// Optional UI (lazy)
+const WhatsAppFloat = lazy(() => import("./components/WhatsAppFloat.jsx"));
 
 function App() {
-
-
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      <ToastContainer/>
-      <Navbar/>
-      <SearchBar/>
-      <LoadingSpinner/>
-      <Routes>
-        <Route path="/" element={<Home/>}></Route>
-        <Route path="/collection" element={<Collection/>}></Route>
-        <Route path='/bulkorders' element={<BulkOrder/>}></Route>
-        <Route path="/about" element={<About/>}></Route>
-        {/* <Route path="contact" element={<Contact/>}></Route> */}
-        <Route path="/product/:productId" element={<Prouduct/>}></Route>
-        <Route path='/cart' element={<Cart/>}></Route>
-        <Route path='login' element={<Login/>}></Route>
-        <Route path="/placeorder" element={<Placeorder/>}></Route>
-        <Route path="/orders" element={<Orders/>}></Route>
-        <Route path='/verify' element={<Verify/>}></Route>
-        <Route path="/verify-email/:token" element={<VerifyEmail/>} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-      </Routes> 
-      <WhatsAppFloat/>
-      <Footer/>
-    </div>
-  )
-} 
+      
+      {/* Toast notifications */}
+      <ToastContainer />
 
-export default App
+      {/* Always-visible layout */}
+      <Navbar />
+      <SearchBar />
+
+      {/* Page loader */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/bulkorders" element={<BulkOrder />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/product/:productId" element={<Product />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/placeorder" element={<Placeorder />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        </Routes>
+
+        {/* Non-critical UI */}
+        <WhatsAppFloat />
+      </Suspense>
+
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
