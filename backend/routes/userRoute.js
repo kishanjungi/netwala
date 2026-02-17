@@ -20,7 +20,7 @@ userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/admin', adminLogin);
 userRouter.post('/google-login', googleLogin);
-userRouter.get('/profile',auth,profileinfo);
+userRouter.post('/profile',auth,profileinfo);
 
 // Email verification routes
 userRouter.get('/verify-email/:token', verifyEmail);
