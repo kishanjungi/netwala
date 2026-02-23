@@ -1,4 +1,4 @@
-import logo from './logo_pic.png'
+import logo_pic from './logo_pic.png'
 import add_icon from './add_icon.png'
 import order_icon from './order_icon.png'
 import upload_area from './upload_area.png'
