@@ -6,7 +6,7 @@ import 'dotenv/config';
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import redis from "../config/redis.js";
+// import redis from "../config/redis.js";
 import logger from "../utils/logger.js";
 import Sentry from '../utils/sentry.js';
 
@@ -265,12 +265,12 @@ const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const redisKey = `forgot:${email}`;
-    const attempts = await redis.incr(redisKey);
+    // const redisKey = `forgot:${email}`;
+    // const attempts = await redis.incr(redisKey);
 
-    if (attempts === 1) {
-      await redis.expire(redisKey, WINDOW_TIME);
-    }
+    // if (attempts === 1) {
+    //   await redis.expire(redisKey, WINDOW_TIME);
+    // }
 
     if (attempts > MAX_ATTEMPTS) {
       return res.status(429).json({

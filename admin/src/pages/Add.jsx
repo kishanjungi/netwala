@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import { assets } from '../assets/assets'
 import axios from 'axios';
 import { backendUrl } from '../App';
-import {toast, ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
-const Add = ({token}) => {
+const Add = ({ token }) => {
 
   const [image1, setImage1] = useState(false);
   const [image2, setImage2] = useState(false);
@@ -18,6 +18,7 @@ const Add = ({token}) => {
   const [description2, setDescrption2] = useState('');
   const [description3, setDescrption3] = useState('');
   const [description4, setDescrption4] = useState('');
+  const [stock, setStock] = useState('');
 
   const [price, setPrice] = useState('');
   // const [category, setCategory] = useState('Men');
@@ -41,6 +42,7 @@ const Add = ({token}) => {
       // formData.append("subCategory", subCategory);
       formData.append("price", price);
       formData.append("bestseller", bestseller);
+      formData.append("stock", stock)
       // formData.append("sizes", JSON.stringify(sizes));
 
       image1 && formData.append("image1", image1);
@@ -48,25 +50,25 @@ const Add = ({token}) => {
       image3 && formData.append("image3", image3);
       image4 && formData.append("image4", image4);
 
-      const response = await axios.post(backendUrl + "/api/product/add", formData,{headers:{token}});
+      const response = await axios.post(backendUrl + "/api/product/add", formData, { headers: { token } });
 
-      if(response.data.success){
-          toast.success(response.data.message);
-          setName("");
-          setDescrption("");
-          setDescrption1("");
-          setDescrption2("");
-          setDescrption3("");
-          setDescrption4("");
-          setImage1(false);
-          setImage2(false);
-          setImage3(false);
-          setImage4(false);
-
-          setPrice("")
-      }else{
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setName("");
+        setDescrption("");
+        setDescrption1("");
+        setDescrption2("");
+        setDescrption3("");
+        setDescrption4("");
+        setImage1(false);
+        setImage2(false);
+        setImage3(false);
+        setImage4(false);
+        setStock("");
+        setPrice("")
+      } else {
         toast.error(response.data.message);
-      } 
+      }
 
 
     }
@@ -113,15 +115,15 @@ const Add = ({token}) => {
       </div>
       <div className='w-full'>
         <p className='mb-2'>Product Description1</p>
-        <textarea onChange={(e) => setDescrption1(e.target.value)} value={description1} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+        <textarea onChange={(e) => setDescrption1(e.target.value)} value={description1} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' />
       </div>
       <div className='w-full'>
         <p className='mb-2'>Product Description2</p>
-        <textarea onChange={(e) => setDescrption2(e.target.value)} value={description2} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+        <textarea onChange={(e) => setDescrption2(e.target.value)} value={description2} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' />
       </div>
       <div className='w-full'>
         <p className='mb-2'>Product Description3</p>
-        <textarea onChange={(e) => setDescrption3(e.target.value)} value={description3} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here'  />
+        <textarea onChange={(e) => setDescrption3(e.target.value)} value={description3} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' />
       </div>
       <div className='w-full'>
         <p className='mb-2'>Product Description4</p>
@@ -147,7 +149,10 @@ const Add = ({token}) => {
 
           </select>
         </div> */}
-
+        <div>
+          <p className='mb-2' >Stock</p>
+          <input onChange={(e) => setStock(e.target.value)} value={stock} className='w-full px-3 py-2 sm:w-[120px]' type="Number" placeholder='25' />
+        </div>
         <div>
           <p className='mb-2' >Product Price</p>
           <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px]' type="Number" placeholder='25' />
@@ -184,7 +189,7 @@ const Add = ({token}) => {
         <button type='submit' className='w-28 py-3 mt-4 bg-black text-white'>ADD</button>
 
       </div>
-      
+
     </form>
   )
 }
