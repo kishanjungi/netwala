@@ -53,7 +53,7 @@ const AllUser = ({ token }) => {
       const response = await axios.post(
         backendUrl + "/api/alluser/deleteuser",
         {
-          userId: userId
+         id: userId 
         },
         {
           headers: {
