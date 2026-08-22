@@ -99,6 +99,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hasedPassword,
+      isEmailVerified:true,
       verificationToken,
       verificationTokenExpiry: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
     });
